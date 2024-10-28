@@ -4,15 +4,10 @@ Minecraft Mod. Basic inventory tweaks designed to supplement inventory sorting m
 
 - [Modpack Permissions](https://mods.twelveiterations.com/permissions)
 
-#### Forge
+#### Downloads
 
 [![Versions](http://cf.way2muchnoise.eu/versions/368825_latest.svg)](https://www.curseforge.com/minecraft/mc-mods/inventory-essentials)
 [![Downloads](http://cf.way2muchnoise.eu/full_368825_downloads.svg)](https://www.curseforge.com/minecraft/mc-mods/inventory-essentials)
-
-#### Fabric
-
-[![Versions](http://cf.way2muchnoise.eu/versions/547699_latest.svg)](https://www.curseforge.com/minecraft/mc-mods/inventory-essentials-fabric)
-[![Downloads](http://cf.way2muchnoise.eu/full_547699_downloads.svg)](https://www.curseforge.com/minecraft/mc-mods/inventory-essentials-fabric)
 
 ## Contributing
 
