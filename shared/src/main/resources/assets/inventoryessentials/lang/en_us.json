@@ -19,6 +19,8 @@
   "config.inventoryessentials.forceClientImplementation.tooltip": "Use the client implementation even on servers that have the mod installed - only useful for development purposes.",
   "config.inventoryessentials.allowBulkTransferAllOnEmptySlot": "Allow Transfer All on Empty Slot",
   "config.inventoryessentials.allowBulkTransferAllOnEmptySlot.tooltip": "Should Transfer All move all items even if an empty slot was clicked?",
+  "config.inventoryessentials.bulkTransferArmorSets": "Bulk Transfer Armor Sets",
+  "config.inventoryessentials.bulkTransferArmorSets.tooltip": "Should space-clicking armor in the inventory swap to all matching armor?",
   "config.inventoryessentials.whereDidTheConfigsGo": "Configs moved to Controls",
   "config.inventoryessentials.whereDidTheConfigsGo.tooltip": "You can now go into your Controls and unbind the respective Inventory Essentials keys instead!"
 }
