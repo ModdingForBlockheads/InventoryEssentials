@@ -16,8 +16,5 @@ public class InventoryEssentialsConfigData implements BalmConfigData {
     @Comment("Should space-clicking armor in the inventory swap to all matching armor?")
     public boolean bulkTransferArmorSets = true;
 
-    @Comment("You can now go into your Controls and unbind the respective Inventory Essentials keys instead!")
-    public boolean whereDidTheConfigsGo = true;
-
 }
 
