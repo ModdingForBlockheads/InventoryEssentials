@@ -1,17 +1,17 @@
 package net.blay09.mods.inventoryessentials;
 
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.ArmorItem;
-import net.minecraft.world.item.Equipable;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class InventoryUtils {
 
@@ -46,8 +46,9 @@ public class InventoryUtils {
         final var result = new HashMap<EquipmentSlot, Slot>();
         final var equipmentSlots = Arrays.stream(EquipmentSlot.values()).filter(EquipmentSlot::isArmor).toList();
         final var baseItem = baseSlot.getItem();
-        if (baseItem.getItem() instanceof Equipable equipable) {
-            result.put(equipable.getEquipmentSlot(), baseSlot);
+        final var baseEquippable = baseItem.get(DataComponents.EQUIPPABLE);
+        if (baseEquippable != null && baseEquippable.slot().isArmor()) {
+            result.put(baseEquippable.slot(), baseSlot);
         }
 
         for (final var slot : menu.slots) {
@@ -56,9 +57,10 @@ public class InventoryUtils {
             }
 
             final var slotStack = slot.getItem();
-            if (slotStack.getItem() instanceof Equipable equipable && equipable.getEquipmentSlot().isArmor()) {
-                if (isMatchingArmorSet(baseItem, slotStack) && !result.containsKey(equipable.getEquipmentSlot())) {
-                    result.put(equipable.getEquipmentSlot(), slot);
+            final var slotEquippable = slotStack.get(DataComponents.EQUIPPABLE);
+            if (slotEquippable != null && slotEquippable.slot().isArmor()) {
+                if (isMatchingArmorSet(baseItem, slotStack) && !result.containsKey(slotEquippable.slot())) {
+                    result.put(slotEquippable.slot(), slot);
                 }
             }
             if (result.size() >= equipmentSlots.size()) {
@@ -70,8 +72,10 @@ public class InventoryUtils {
     }
 
     private static boolean isMatchingArmorSet(ItemStack baseItem, ItemStack otherItem) {
-        if (baseItem.getItem() instanceof ArmorItem baseArmorItem && otherItem.getItem() instanceof ArmorItem otherArmorItem) {
-            return baseArmorItem.getMaterial() == otherArmorItem.getMaterial();
+        final var baseEquippable = baseItem.get(DataComponents.EQUIPPABLE);
+        final var otherEquippable = otherItem.get(DataComponents.EQUIPPABLE);
+        if (baseEquippable != null && otherEquippable != null) {
+            return Objects.equals(baseEquippable.assetId().orElse(null), otherEquippable.assetId().orElse(null));
         }
 
         return false;

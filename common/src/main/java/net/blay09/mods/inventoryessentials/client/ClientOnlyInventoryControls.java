@@ -6,6 +6,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -13,7 +14,6 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.Equipable;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.*;
@@ -119,7 +119,8 @@ public class ClientOnlyInventoryControls implements InventoryControls {
             isProbablyMovingToPlayerInventory = InventoryUtils.containerContainsPlayerInventory(menu);
         }
 
-        boolean clickedAnArmorItem = clickedSlot.getItem().getItem() instanceof Equipable equipable && equipable.getEquipmentSlot().isArmor();
+        final var clickedEquippable = clickedSlot.getItem().get(DataComponents.EQUIPPABLE);
+        boolean clickedAnArmorItem = clickedEquippable != null && clickedEquippable.slot().isArmor();
         boolean isInsideInventory = menu instanceof InventoryMenu;
 
         boolean movedAny = false;
