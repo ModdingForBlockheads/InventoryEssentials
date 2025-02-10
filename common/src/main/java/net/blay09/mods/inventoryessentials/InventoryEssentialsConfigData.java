@@ -13,5 +13,8 @@ public class InventoryEssentialsConfigData implements BalmConfigData {
     @Comment("Should space-clicking move all items even if an empty slot was clicked?")
     public boolean allowBulkTransferAllOnEmptySlot = false;
 
+    @Comment("Should space-clicking armor in the inventory swap to all matching armor?")
+    public boolean bulkTransferArmorSets = true;
+
 }
 

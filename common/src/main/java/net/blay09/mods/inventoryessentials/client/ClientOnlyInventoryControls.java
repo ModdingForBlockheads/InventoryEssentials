@@ -6,11 +6,14 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.core.NonNullList;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.Equipable;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.*;
@@ -116,6 +119,9 @@ public class ClientOnlyInventoryControls implements InventoryControls {
             isProbablyMovingToPlayerInventory = InventoryUtils.containerContainsPlayerInventory(menu);
         }
 
+        boolean clickedAnArmorItem = clickedSlot.getItem().getItem() instanceof Equipable equipable && equipable.getEquipmentSlot().isArmor();
+        boolean isInsideInventory = menu instanceof InventoryMenu;
+
         boolean movedAny = false;
 
         // If we're probably transferring to the player inventory, use transfer-to-inventory behaviour instead of just shift-clicking the items
@@ -150,6 +156,38 @@ public class ClientOnlyInventoryControls implements InventoryControls {
                     }
                 }
             }
+        } else if (clickedAnArmorItem && isInsideInventory) {
+            if (!InventoryEssentialsConfig.getActive().bulkTransferArmorSets) {
+                return false;
+            }
+
+            // If holding an item in hand already, do nothing
+            if (!menu.getCarried().isEmpty()) {
+                return false;
+            }
+
+            // When clicking an equipped armor, un-equip all
+            if (clickedSlot.index >= InventoryMenu.ARMOR_SLOT_START && clickedSlot.index < InventoryMenu.ARMOR_SLOT_END) {
+                for (int i = InventoryMenu.ARMOR_SLOT_START; i < InventoryMenu.ARMOR_SLOT_END; i++) {
+                    slotClick(menu, i, 0, ClickType.QUICK_MOVE);
+                }
+                return true;
+            }
+
+            // Swap current armor with clicked armor set
+            final var armorSlots = InventoryUtils.findMatchingArmorSetSlots(menu, clickedSlot);
+            final var equipmentSlots = List.of(EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET);
+            for (int i = InventoryMenu.ARMOR_SLOT_START; i < InventoryMenu.ARMOR_SLOT_END; i++) {
+                final var equipmentSlot = equipmentSlots.get(i - InventoryMenu.ARMOR_SLOT_START);
+                final var swapSlot = armorSlots.get(equipmentSlot);
+                if (swapSlot != null) {
+                    slotClick(menu, i, 0, ClickType.PICKUP);
+                    slotClick(menu, swapSlot, 0, ClickType.PICKUP);
+                    slotClick(menu, i, 0, ClickType.PICKUP);
+                }
+            }
+
+            movedAny = true;
         } else {
             // Just a normal inventory-to-inventory transfer, simply shift-click the items
             for (Slot slot : menu.slots) {
