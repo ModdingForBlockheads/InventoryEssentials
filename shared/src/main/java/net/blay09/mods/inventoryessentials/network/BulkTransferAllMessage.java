@@ -1,13 +1,17 @@
 package net.blay09.mods.inventoryessentials.network;
 
+import net.blay09.mods.inventoryessentials.InventoryEssentialsConfig;
 import net.blay09.mods.inventoryessentials.InventoryUtils;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.Equipable;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.*;
@@ -41,6 +45,9 @@ public class BulkTransferAllMessage {
                 isProbablyMovingToPlayerInventory = InventoryUtils.containerContainsPlayerInventory(menu);
             }
 
+            boolean clickedAnArmorItem = clickedSlot.getItem().getItem() instanceof Equipable equipable && equipable.getEquipmentSlot().isArmor();
+            boolean isInsideInventory = menu instanceof InventoryMenu;
+
             if (isProbablyMovingToPlayerInventory) {
                 // To avoid O(n²), find empty and non-empty slots beforehand in one loop iteration
                 Deque<Slot> emptySlots = new ArrayDeque<>();
@@ -66,6 +73,31 @@ public class BulkTransferAllMessage {
                     if (InventoryUtils.isSameInventory(slot, clickedSlot, true)) {
                         // and bulk-transfer each of them using the prefer-inventory behaviour
                         bulkTransferPreferInventory(player, menu, emptySlots, nonEmptySlots, slot);
+                    }
+                }
+            } else if (clickedAnArmorItem && isInsideInventory) {
+                if (!InventoryEssentialsConfig.getActive().bulkTransferArmorSets) {
+                    return;
+                }
+
+                // When clicking an equipped armor, un-equip all
+                if (clickedSlot.index >= InventoryMenu.ARMOR_SLOT_START && clickedSlot.index < InventoryMenu.ARMOR_SLOT_END) {
+                    for (int i = InventoryMenu.ARMOR_SLOT_START; i < InventoryMenu.ARMOR_SLOT_END; i++) {
+                        menu.clicked(i, 0, ClickType.QUICK_MOVE, player);
+                    }
+                    return;
+                }
+
+                // Swap current armor with clicked armor set
+                final var armorSlots = InventoryUtils.findMatchingArmorSetSlots(menu, clickedSlot);
+                final var equipmentSlots = List.of(EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET);
+                for (int i = InventoryMenu.ARMOR_SLOT_START; i < InventoryMenu.ARMOR_SLOT_END; i++) {
+                    final var equipmentSlot = equipmentSlots.get(i - InventoryMenu.ARMOR_SLOT_START);
+                    final var swapSlot = armorSlots.get(equipmentSlot);
+                    if (swapSlot != null) {
+                        menu.clicked(i, 0, ClickType.PICKUP, player);
+                        menu.clicked(swapSlot.index, 0, ClickType.PICKUP, player);
+                        menu.clicked(i, 0, ClickType.PICKUP, player);
                     }
                 }
             } else {
