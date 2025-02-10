@@ -1,2 +1,1 @@
-- Updated to Minecraft 1.21.1
-- Removed outdated config comment about key mappings
+- Added `bulkTransferArmorSets` option to quickly swap armor sets through space-click
